@@ -1,0 +1,16 @@
+node_modules
+**/__pycache__
+**/*.py[cod]
+.venv
+**/.venv
+.next
+.env
+.env.local
+.git
+.gitignore
+README.md
+.DS_Store
+*.log
+.vercel
+dist
+build
