@@ -14,6 +14,9 @@ inputs:
   role-to-assume:
     description: IAM role ARN to assume (needs ECR push permissions).
     required: true
+  aws-account-id:
+    description: AWS account ID for the ECR registry URL (12-digit).
+    required: true
 
 runs:
   using: composite
@@ -34,10 +37,11 @@ runs:
     - name: "deploy · ecr login, tag, push"
       shell: bash
       env:
+        AWS_ACCOUNT_ID: ${{ inputs.aws-account-id }}
         DEFAULT_AWS_REGION: ${{ inputs.aws-region }}
       run: |
         set -euo pipefail
-        : "${AWS_ACCOUNT_ID:?AWS_ACCOUNT_ID must be set in the job env}"
+        : "${AWS_ACCOUNT_ID:?aws-account-id input must be non-empty}"
         REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${DEFAULT_AWS_REGION}.amazonaws.com"
         aws ecr get-login-password --region "${DEFAULT_AWS_REGION}" \
           | docker login --username AWS --password-stdin "${REGISTRY}"
