@@ -1,0 +1,45 @@
+name: Deploy
+description: Docker build, tag, and push to dev ECR (health-app-ecr).
+
+inputs:
+  aws-access-key-id:
+    description: AWS access key ID used before assuming the deploy role.
+    required: true
+  aws-secret-access-key:
+    description: AWS secret access key.
+    required: true
+  aws-region:
+    description: AWS region (ECR and Terraform).
+    required: true
+  role-to-assume:
+    description: IAM role ARN to assume (needs ECR push permissions).
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: "deploy · docker build"
+      shell: bash
+      run: docker build -t consultation-app:latest .
+
+    - name: "deploy · aws credentials"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+        role-to-assume: ${{ inputs.role-to-assume }}
+        role-duration-seconds: 3600
+
+    - name: "deploy · ecr login, tag, push"
+      shell: bash
+      env:
+        DEFAULT_AWS_REGION: ${{ inputs.aws-region }}
+      run: |
+        set -euo pipefail
+        : "${AWS_ACCOUNT_ID:?AWS_ACCOUNT_ID must be set in the job env}"
+        REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${DEFAULT_AWS_REGION}.amazonaws.com"
+        aws ecr get-login-password --region "${DEFAULT_AWS_REGION}" \
+          | docker login --username AWS --password-stdin "${REGISTRY}"
+        docker tag consultation-app:latest "${REGISTRY}/health-app-ecr:latest"
+        docker push "${REGISTRY}/health-app-ecr:latest"

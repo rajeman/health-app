@@ -1,0 +1,54 @@
+name: Build
+description: Terraform fmt, init (S3 backend), validate, and Docker image build.
+
+inputs:
+  aws-access-key-id:
+    description: AWS access key ID used before assuming the role (S3 backend + provider).
+    required: true
+  aws-secret-access-key:
+    description: AWS secret access key.
+    required: true
+  aws-region:
+    description: AWS region (must match Terraform provider and S3 backend region).
+    required: true
+  role-to-assume:
+    description: IAM role ARN to assume (needs S3 state access and validation).
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: "build · terraform"
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.9.0"
+        terraform_wrapper: false
+
+    - name: "build · aws credentials"
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+        role-to-assume: ${{ inputs.role-to-assume }}
+        role-duration-seconds: 3600
+
+    - name: "build · terraform fmt"
+      shell: bash
+      working-directory: terraform
+      run: terraform fmt -check -recursive
+
+    - name: "build · terraform init & validate"
+      shell: bash
+      working-directory: terraform
+      env:
+        TF_VAR_openai_api_key: "ci-placeholder"
+        TF_VAR_clerk_secret_key: "ci-placeholder"
+        TF_VAR_clerk_jwks_url: "https://placeholder.example/.well-known/jwks.json"
+      run: |
+        terraform init -input=false
+        terraform validate
+
+    - name: "build · docker"
+      shell: bash
+      run: docker build -t consultation-app:latest .
