@@ -38,7 +38,7 @@ runs:
       working-directory: terraform
       run: terraform fmt -check -recursive
 
-    - name: "build · terraform init & validate"
+    - name: "build · terraform init, validate & output"
       shell: bash
       working-directory: terraform
       env:
@@ -48,6 +48,7 @@ runs:
       run: |
         terraform init -input=false
         terraform validate
+        terraform output
 
     - name: "build · docker"
       shell: bash
