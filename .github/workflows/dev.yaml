@@ -26,6 +26,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-1
           role-to-assume: ${{ secrets.MAIN_AWS_DEPLOY_DEV_ARN }}
+          tf_var_openai_api_key: ${{ secrets.TF_VAR_openai_api_key }}
+          tf_var_clerk_secret_key: ${{ secrets.TF_VAR_clerk_secret_key }}
+          tf_var_clerk_jwks_url: ${{ secrets.TF_VAR_clerk_jwks_url }}
 
   deploy:
     runs-on: ubuntu-latest

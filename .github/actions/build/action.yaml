@@ -14,6 +14,15 @@ inputs:
   role-to-assume:
     description: IAM role ARN to assume (needs S3 state access and validation).
     required: true
+  tf_var_openai_api_key:
+    description: Value for TF_VAR_openai_api_key.
+    required: true
+  tf_var_clerk_secret_key:
+    description: Value for TF_VAR_clerk_secret_key.
+    required: true
+  tf_var_clerk_jwks_url:
+    description: Value for TF_VAR_clerk_jwks_url.
+    required: true
 
 runs:
   using: composite
@@ -42,9 +51,9 @@ runs:
       shell: bash
       working-directory: terraform
       env:
-        TF_VAR_openai_api_key: "ci-placeholder"
-        TF_VAR_clerk_secret_key: "ci-placeholder"
-        TF_VAR_clerk_jwks_url: "https://placeholder.example/.well-known/jwks.json"
+        TF_VAR_openai_api_key: ${{ inputs.tf_var_openai_api_key }}
+        TF_VAR_clerk_secret_key: ${{ inputs.tf_var_clerk_secret_key }}
+        TF_VAR_clerk_jwks_url: ${{ inputs.tf_var_clerk_jwks_url }}
       run: |
         terraform init -input=false
         terraform validate
