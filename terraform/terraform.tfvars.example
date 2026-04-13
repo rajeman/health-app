@@ -1,0 +1,18 @@
+# Option A — environment variables (recommended for local/CI; not committed):
+#   export TF_VAR_openai_api_key="sk-..."
+#   export TF_VAR_clerk_secret_key="sk_live_..."
+#   export TF_VAR_clerk_jwks_url="https://<instance>.clerk.accounts.dev/.well-known/jwks.json"
+#   terraform plan && terraform apply
+#
+# Option B — copy this file to terraform.tfvars (gitignored) and set values:
+# openai_api_key   = "sk-..."
+# clerk_secret_key = "sk_live_..."
+# clerk_jwks_url   = "https://<instance>.clerk.accounts.dev/.well-known/jwks.json"
+#
+# aws_region  = "eu-west-1"
+# environment = "dev"
+#
+# Optional:
+# runtime_environment_variables = {
+#   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_live_..."
+# }
